@@ -1,4 +1,5 @@
 extern crate spin;
+extern crate num_cpus;
 
 mod table;
 mod map;

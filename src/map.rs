@@ -9,6 +9,7 @@ use std::u16;
 use std::borrow::Borrow;
 use std::iter::{FromIterator, IntoIterator};
 use table::*;
+use num_cpus;
 
 // This is the user-facing part of the implementation.
 // ConcHashMap wraps a couple of actual hash tables (Table) with locks around them.
@@ -303,7 +304,7 @@ impl <H> Default for Options<H> where H: BuildHasher+Default {
         Options {
             capacity: 0,
             hasher_factory: Default::default(),
-            concurrency: 16
+            concurrency: num_cpus::get() as u16,
         }
     }
 }

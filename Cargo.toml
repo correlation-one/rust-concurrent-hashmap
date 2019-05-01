@@ -7,6 +7,9 @@ repository = "https://github.com/veddan/rust-concurrent-hashmap.git"
 documentation = "https://veddan.github.io/rustdoc/concurrent-hashmap/concurrent_hashmap/index.html"
 description = "A concurrent hashmap library."
 
+[dependencies]
+num_cpus = "1.10.0"
+
 [dependencies.spin]
 version = '0.4.5'
 default-features = false
