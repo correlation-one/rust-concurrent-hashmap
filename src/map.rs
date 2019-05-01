@@ -380,10 +380,10 @@ mod test {
         let map: ConcHashMap<i32, i32> = Default::default();
         assert!(map.find(&1).is_none());
         map.insert(1, 2);
-        assert_eq!(map.find(&1).unwrap().get(), &2);
+        assert_eq!(*map.find(&1).unwrap(), 2);
         assert!(map.find(&2).is_none());
         map.insert(2, 4);
-        assert_eq!(map.find(&2).unwrap().get(), &4);
+        assert_eq!(*map.find(&2).unwrap(), 4);
     }
 
     #[test]
@@ -391,10 +391,10 @@ mod test {
         let map: ConcHashMap<i32, &'static str> = Default::default();
         assert!(map.find(&1).is_none());
         map.insert(1, &"old");
-        assert_eq!(map.find(&1).unwrap().get(), &"old");
+        assert_eq!(*map.find(&1).unwrap(), "old");
         let old = map.insert(1, &"new");
         assert_eq!(Some("old"), old);
-        assert_eq!(map.find(&1).unwrap().get(), &"new");
+        assert_eq!(*map.find(&1).unwrap(), "new");
     }
 
     #[test]
@@ -445,7 +445,7 @@ mod test {
         }
         let clone = orig.clone();
         for i in 0..100 {
-            assert_eq!(orig.find(&i).unwrap().get(), clone.find(&i).unwrap().get());
+            assert_eq!(*orig.find(&i).unwrap(), *clone.find(&i).unwrap());
         }
     }
 
@@ -468,9 +468,9 @@ mod test {
         map.insert(2, "two".to_string());
         map.insert(3, "three".to_string());
         assert_eq!(Some("two".to_string()), map.remove(&2));
-        assert_eq!("one", map.find(&1).unwrap().get());
+        assert_eq!("one", *map.find(&1).unwrap());
         assert!(map.find(&2).is_none());
-        assert_eq!("three", map.find(&3).unwrap().get());
+        assert_eq!("three", *map.find(&3).unwrap());
     }
 
     #[test]
@@ -489,7 +489,7 @@ mod test {
             if i % 2 == 0 {
                 assert!(x.is_none());
             } else {
-                assert_eq!(&(i * i).to_string(), x.unwrap().get());
+                assert_eq!((i * i).to_string(), *x.unwrap());
             }
         }
     }
@@ -513,11 +513,11 @@ mod test {
         for i in 0..100 {
             let x = map.find(&i);
             if i % 4 == 0 {
-                assert_eq!(&i.to_string(), x.unwrap().get());
+                assert_eq!(i.to_string(), *x.unwrap());
             } else if i % 2 == 0 {
                 assert!(x.is_none());
             } else {
-                assert_eq!(&(i * i).to_string(), x.unwrap().get());
+                assert_eq!((i * i).to_string(), *x.unwrap());
             }
         }
     }
@@ -535,9 +535,9 @@ mod test {
     fn mut_modify() {
         let map: ConcHashMap<u32, u32> = Default::default();
         map.insert(1, 0);
-        let mut e = map.find_mut(&1).unwrap().get();
+        let mut e = map.find_mut(&1).unwrap();
         *e += 1;
-        assert_eq!(&1, map.find(&1).unwrap().get());
+        assert_eq!(1, *map.find(&1).unwrap());
     }
 
     #[test]
@@ -552,14 +552,14 @@ mod test {
         let tl_map = mmap.clone();
         let reader = thread::spawn(move || {
             for i in 0..range {
-                tl_map.find(&i).unwrap().get();
+                tl_map.find(&i).unwrap();
             }
         });
 
         let tl_map = mmap.clone();
         let writer = thread::spawn(move || {
             for i in 0..range {
-                let mut e = tl_map.find_mut(&i).unwrap().get();
+                let mut e = tl_map.find_mut(&i).unwrap();
                 *e += 1;
             }
         });
@@ -567,7 +567,7 @@ mod test {
         reader.join().unwrap();
         writer.join().unwrap();
         for i in 0..range {
-            assert_eq!(map.find(&i).unwrap().get(), &(i*i+1));
+            assert_eq!(*map.find(&i).unwrap(), (i*i+1));
         }
     }
 
@@ -575,7 +575,7 @@ mod test {
             where K: Eq + Hash + Debug + Send + Sync, V: Eq + Debug + Send + Sync, H: BuildHasher {
         match map.find(key) {
             None    => panic!("missing key {:?} should map to {:?}", key, expected_val),
-            Some(v) => assert_eq!(*v.get(), *expected_val)
+            Some(v) => assert_eq!(*v, *expected_val)
         }
     }
 }

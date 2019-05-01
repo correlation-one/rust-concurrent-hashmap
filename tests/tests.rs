@@ -26,7 +26,7 @@ fn many_threads() {
                 map.insert(i, t);
                 let x = rng.gen_range(0, max);
                 match map.find(&x) {
-                    Some(ref y) if x / n != *y.get() => return Err(format!("{} => {}", x, *y.get())),
+                    Some(ref y) if x / n != **y => return Err(format!("{} => {}", x, **y)),
                     _ => { }
                 }
             }
@@ -55,7 +55,7 @@ fn count_compare_with_sequential() {
         if seq_v.is_none() && par_v.is_none() {
             continue;
         }
-        assert_eq!(seq_v.unwrap(), par_v.unwrap().get());
+        assert_eq!(*seq_v.unwrap(), *par_v.unwrap());
     }
 
     fn count_seq(nums: &[u32]) -> HashMap<u32, u32> {

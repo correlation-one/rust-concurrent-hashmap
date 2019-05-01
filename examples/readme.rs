@@ -10,7 +10,7 @@ fn main() {
     if let Some(mut val) = map.find_mut(&30) {
         // Update a value in-place if it exists
         // This mapping can not be modified while we have a reference to it
-        *val.get() += 3;
+        *val += 3;
     }
     // Update the value with key 129, or insert a default (3)
     map.upsert(129, 3, &|x| *x *= 3);  // 129 => 3

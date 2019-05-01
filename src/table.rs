@@ -5,6 +5,7 @@ use std::mem;
 use std::cmp::max;
 use std::mem::size_of;
 use std::marker::{Send, Sync};
+use std::ops::{Deref, DerefMut};
 
 // This is the actual hash table implementation.
 // The Table struct does not have any synchronization; that is handled by the ConHashMap wrapper.
@@ -79,11 +80,20 @@ impl <'a, K, V> Accessor<'a, K, V> {
         }
     }
 
-    pub fn get(&self) -> &'a V {
-        debug_assert!(self.table.is_present(self.idx));
+    pub fn get(this: &Self) -> &'a V {
+        debug_assert!(this.table.is_present(this.idx));
         unsafe {
-            &*self.table.values.offset(self.idx as isize)
+            &*this.table.values.offset(this.idx as isize)
         }
+    }
+}
+
+
+impl <'a, K, V> Deref for Accessor<'a, K, V> {
+    type Target = V;
+
+    fn deref(&self) -> &Self::Target {
+        Self::get(self)
     }
 }
 
@@ -95,11 +105,32 @@ impl <'a, K, V> MutAccessor<'a, K, V> {
         }
     }
 
-    pub fn get(&mut self) -> &'a mut V {
-        debug_assert!(self.table.is_present(self.idx));
+    pub fn get(this: &Self) -> &'a V {
+        debug_assert!(this.table.is_present(this.idx));
         unsafe {
-            &mut *self.table.values.offset(self.idx as isize)
+            &*this.table.values.offset(this.idx as isize)
         }
+    }
+
+    pub fn get_mut(this: &mut Self) -> &'a mut V {
+        debug_assert!(this.table.is_present(this.idx));
+        unsafe {
+            &mut *this.table.values.offset(this.idx as isize)
+        }
+    }
+}
+
+impl <'a, K, V> Deref for MutAccessor<'a, K, V> {
+    type Target = V;
+
+    fn deref(&self) -> &Self::Target {
+        Self::get(self)
+    }
+}
+
+impl <'a, K, V> DerefMut for MutAccessor<'a, K, V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Self::get_mut(self)
     }
 }
 
